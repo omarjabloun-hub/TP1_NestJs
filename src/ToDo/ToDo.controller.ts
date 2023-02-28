@@ -1,21 +1,45 @@
 import {
-    Controller,
-    Get
+    Body,
+    Controller, Delete,
+    Get, Param, Patch,
+    Post
 } from '@nestjs/common';
-// @ts-ignore
-import { TodoModel, TodoStatus } from './/tp1_gl/src/to-do';
+import {ToDoModel} from './ToDoModel';
+import {TodoStatus} from "./ToDoStatus";
+import {CreateToDoDto} from "./CreateToDoDto"
+import { v4 as uuidv4 } from 'uuid';
+import {UpdateTodoDto} from "./UpdateTodoDto";
+import {TodoService} from "./todo.service";
 
-@Controller('to-do')
+
+@Controller('todo')
 export class ToDoController {
-
-    todos: TodoModel[] = [
-        new TodoModel(1, 'Todo 1', 'Description 1', new Date(), TodoStatus.Pending),
-        new TodoModel(2, 'Todo 2', 'Description 2', new Date(), TodoStatus.InProgress),
-        new TodoModel(3, 'Todo 3', 'Description 3', new Date(), TodoStatus.Completed),
-    ];
+    constructor(private readonly todoService: TodoService) {}
 
     @Get()
-    getAllTodos(): TodoModel[] {
-        return this.todos;
+    getAllTodos(): ToDoModel[] {
+        return this.todoService.getAllTodos();
     }
+
+    @Post()
+    createTodo(@Body() todoData: CreateToDoDto): ToDoModel {
+        return this.todoService.createTodo(todoData);
+    }
+
+    @Get(':id')
+    getTodoById(@Param('id') id: string): ToDoModel {
+        return this.todoService.getTodoById(id);
+    }
+
+    @Delete(':id')
+    deleteTodoById(@Param('id') id: string): ToDoModel {
+        return this.todoService.deleteTodoById(id);
+    }
+
+
+    @Patch(':id')
+    updateTodoById(@Param('id') id: string, @Body() todoData: UpdateTodoDto): ToDoModel {
+        return this.todoService.updateTodoById(id,todoData);
+    }
+
 }

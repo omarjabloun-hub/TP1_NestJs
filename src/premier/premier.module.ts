@@ -4,4 +4,6 @@ import { PremierController } from './premier.controller';
 @Module({
   controllers: [PremierController]
 })
-export class PremierModule {}
+export class PremierModule {
+
+}
