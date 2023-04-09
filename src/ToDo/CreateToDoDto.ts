@@ -1,4 +1,4 @@
-export class CreateToDoDto{
-    name ?: string;
-    description ?: string;
+export class CreateToDoDto {
+  name?: string;
+  description?: string;
 }

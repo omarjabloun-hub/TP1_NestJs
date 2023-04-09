@@ -6,7 +6,7 @@ import { ToDoModule } from './ToDo/ToDo.module';
 import { CommonModule } from './common/common.module';
 
 @Module({
-  imports: [PremierModule,  ToDoModule, CommonModule],
+  imports: [PremierModule, ToDoModule, CommonModule],
   controllers: [AppController],
   providers: [AppService],
 })
