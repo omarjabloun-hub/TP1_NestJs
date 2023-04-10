@@ -5,6 +5,7 @@ import { PremierModule } from './premier/premier.module';
 import { ToDoModule } from './ToDo/ToDo.module';
 import { CommonModule } from './common/common.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ToDoModel } from './ToDo/ToDoModel';
 
 @Module({
   imports: [
@@ -16,9 +17,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: 'root',
-      database: 'test',
-      entities: [],
+      password: '',
+      database: 'todo_nest',
+      entities: [ToDoModule],
       synchronize: true,
     }),
   ],

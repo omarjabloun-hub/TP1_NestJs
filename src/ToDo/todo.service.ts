@@ -1,13 +1,19 @@
-import { Body, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ToDoModel } from './ToDoModel';
 import { TodoStatus } from './ToDoStatus';
 import { CreateToDoDto } from './CreateToDoDto';
 import { UpdateTodoDto } from './UpdateTodoDto';
-import { NotFoundError } from 'rxjs';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Not, Repository } from 'typeorm';
 
 @Injectable()
 export class TodoService {
-  constructor(@Inject('UUID') private readonly uuidv4: () => string) {}
+  constructor(
+    @InjectRepository(ToDoModel)
+    private todoRepository: Repository<ToDoModel>,
+    @Inject('UUID')
+    private readonly uuidv4: () => string,
+  ) {}
 
   todos: ToDoModel[] = [
     new ToDoModel(
@@ -56,6 +62,19 @@ export class TodoService {
     this.todos.push(newTodo);
     return newTodo;
   }
+  async addTodo(todoData: CreateToDoDto): Promise<ToDoModel> {
+    const newTodo = new ToDoModel(
+      this.uuidv4(),
+      todoData.name,
+      todoData.description,
+      new Date(),
+      new Date(),
+      new Date(),
+      TodoStatus.Pending,
+    );
+    await this.todoRepository.save(newTodo);
+    return newTodo;
+  }
 
   getTodoById(id: string): ToDoModel {
     const result = this.todos.find((todo) => id === todo.id);
@@ -74,6 +93,26 @@ export class TodoService {
     }
   }
 
+  async deleteTodoByIdDb(id: string): Promise<ToDoModel> {
+    const todoDb = await this.todoRepository.findOneBy({ id: id });
+    if (!todoDb) throw new NotFoundException('Todo Not found with id ' + id);
+    return await this.todoRepository.remove(todoDb);
+  }
+  async restoreTodoById(id: string): Promise<void> {
+    const todo = await this.todoRepository.findOne({
+      where: { id, deletedAt: Not(null) },
+    });
+    if (!todo) {
+      throw new NotFoundException(
+        `Todo with ID ${id} not found or not deleted`,
+      );
+    }
+
+    // Restore the deleted entity
+    todo.deletedAt = null;
+    await this.todoRepository.save(todo);
+  }
+
   updateTodoById(id: string, todoData: UpdateTodoDto): ToDoModel {
     const index = this.todos.findIndex((todo) => todo.id == id);
     if (index !== -1) {
@@ -83,5 +122,17 @@ export class TodoService {
     } else {
       throw new NotFoundException('Todo Not found with id ' + id);
     }
+  }
+  async updateTodoByIdDb(
+    id: string,
+    todoData: UpdateTodoDto,
+  ): Promise<ToDoModel> {
+    const todoDb = await this.todoRepository.findOneBy({ id: id });
+    if (!todoDb) throw new NotFoundException('Todo Not found with id ' + id);
+    todoDb.name = todoData.name ?? todoDb.name;
+    todoDb.description = todoData.description ?? todoDb.description;
+    todoDb.status = todoData.status ?? todoDb.status;
+    await this.todoRepository.save(todoDb);
+    return todoDb;
   }
 }
