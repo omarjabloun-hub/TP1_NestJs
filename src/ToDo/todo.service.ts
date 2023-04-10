@@ -99,18 +99,7 @@ export class TodoService {
     return await this.todoRepository.remove(todoDb);
   }
   async restoreTodoById(id: string): Promise<void> {
-    const todo = await this.todoRepository.findOne({
-      where: { id, deletedAt: Not(null) },
-    });
-    if (!todo) {
-      throw new NotFoundException(
-        `Todo with ID ${id} not found or not deleted`,
-      );
-    }
-
-    // Restore the deleted entity
-    todo.deletedAt = null;
-    await this.todoRepository.save(todo);
+    await this.todoRepository.restore(id);
   }
 
   updateTodoById(id: string, todoData: UpdateTodoDto): ToDoModel {
@@ -134,5 +123,18 @@ export class TodoService {
     todoDb.status = todoData.status ?? todoDb.status;
     await this.todoRepository.save(todoDb);
     return todoDb;
+  }
+  async getTodoNumberByStatus() {
+    return {
+      pending: await this.todoRepository.countBy({
+        status: TodoStatus.Pending,
+      }),
+      inProgress: await this.todoRepository.countBy({
+        status: TodoStatus.InProgress,
+      }),
+      completed: await this.todoRepository.countBy({
+        status: TodoStatus.Completed,
+      }),
+    };
   }
 }

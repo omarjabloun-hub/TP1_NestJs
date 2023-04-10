@@ -24,8 +24,12 @@ export class ToDoController {
   }
 
   @Post()
-  createTodo(@Body() todoData: CreateToDoDto): ToDoModel {
-    return this.todoService.createTodo(todoData);
+  async createTodo(@Body() todoData: CreateToDoDto): Promise<ToDoModel> {
+    return await this.todoService.addTodo(todoData);
+  }
+  @Get('/statusNumber')
+  async getTodoNumberByStatus() {
+    return await this.todoService.getTodoNumberByStatus();
   }
 
   @Get(':id')
@@ -39,10 +43,12 @@ export class ToDoController {
   }
 
   @Patch(':id')
-  updateTodoById(
+  async updateTodoById(
     @Param('id') id: string,
     @Body() todoData: UpdateTodoDto,
-  ): ToDoModel {
-    return this.todoService.updateTodoById(id, todoData);
+  ): Promise<ToDoModel> {
+    return await this.todoService.updateTodoByIdDb(id, todoData);
   }
+
+
 }
