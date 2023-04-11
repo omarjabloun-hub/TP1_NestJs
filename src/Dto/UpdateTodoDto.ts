@@ -1,4 +1,4 @@
-import { TodoStatus } from './ToDoStatus';
+import { TodoStatus } from '../entity/ToDoStatus';
 import {
   TODO_DESCRIPTION_MIN_LENGTH,
   TODO_NAME_LENGTH,

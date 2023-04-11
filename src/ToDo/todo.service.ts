@@ -1,22 +1,23 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ToDoModel } from './ToDoModel';
-import { TodoStatus } from './ToDoStatus';
-import { CreateToDoDto } from './CreateToDoDto';
-import { UpdateTodoDto } from './UpdateTodoDto';
+import { ToDo } from '../entity/ToDo';
+import { TodoStatus } from '../entity/ToDoStatus';
+import { CreateToDoDto } from '../Dto/CreateToDoDto';
+import { UpdateTodoDto } from '../Dto/UpdateTodoDto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
+import {AppDataSource} from "../data-source";
 
 @Injectable()
 export class TodoService {
   constructor(
-    @InjectRepository(ToDoModel)
-    private todoRepository: Repository<ToDoModel>,
+    @InjectRepository(ToDo)
+    private todoRepository: Repository<ToDo>,
     @Inject('UUID')
     private readonly uuidv4: () => string,
   ) {}
 
-  todos: ToDoModel[] = [
-    new ToDoModel(
+  todos: ToDo[] = [
+    new ToDo(
       '1',
       'Todo 1',
       'Description 1',
@@ -25,7 +26,7 @@ export class TodoService {
       new Date(),
       TodoStatus.Pending,
     ),
-    new ToDoModel(
+    new ToDo(
       '2',
       'Todo 2',
       'Description 2',
@@ -34,7 +35,7 @@ export class TodoService {
       new Date(),
       TodoStatus.InProgress,
     ),
-    new ToDoModel(
+    new ToDo(
       '3',
       'Todo 3',
       'Description 3',
@@ -45,12 +46,12 @@ export class TodoService {
     ),
   ];
 
-  getAllTodos(): ToDoModel[] {
+  getAllTodos(): ToDo[] {
     return this.todos;
   }
 
-  createTodo(todoData: CreateToDoDto): ToDoModel {
-    const newTodo = new ToDoModel(
+  createTodo(todoData: CreateToDoDto): ToDo {
+    const newTodo = new ToDo(
       this.uuidv4(),
       todoData.name,
       todoData.description,
@@ -62,8 +63,8 @@ export class TodoService {
     this.todos.push(newTodo);
     return newTodo;
   }
-  async addTodo(todoData: CreateToDoDto): Promise<ToDoModel> {
-    const newTodo = new ToDoModel(
+  async addTodo(todoData: CreateToDoDto): Promise<ToDo> {
+    const newTodo = new ToDo(
       this.uuidv4(),
       todoData.name,
       todoData.description,
@@ -76,7 +77,26 @@ export class TodoService {
     return newTodo;
   }
 
-  getTodoById(id: string): ToDoModel {
+  async getAllTodosDb(status: TodoStatus, key: string, page: number, size: number): Promise<{ todos: ToDo[]; total: number }> {
+    const qb = this.todoRepository.createQueryBuilder('todo');
+
+    if (key) {
+      qb.andWhere('(todo.description LIKE :query OR todo.name LIKE :query)', { query: `%${key}%` });
+    }
+
+    if (status) {
+      qb.andWhere('todo.status = :status', { status });
+    }
+
+    const [todos, total] = await qb
+        .skip((page - 1) * size)
+        .take(size)
+        .getManyAndCount();
+
+    return { todos, total };
+  }
+
+  getTodoById(id: string): ToDo {
     const result = this.todos.find((todo) => id === todo.id);
     if (result == null) {
       throw new NotFoundException('Todo Not found with id ' + id);
@@ -84,7 +104,15 @@ export class TodoService {
     return result;
   }
 
-  deleteTodoById(id: string): ToDoModel {
+  async getTodoByIdDb(id: string): Promise<ToDo> {
+    const result = this.todoRepository.findOneBy({ id: id });
+    if (result == null) {
+      throw new NotFoundException('Todo Not found with id ' + id);
+    }
+    return result;
+  }
+
+  deleteTodoById(id: string): ToDo {
     const index = this.todos.findIndex((todo) => todo.id === id);
     if (index !== -1) {
       return this.todos.splice(index, 1)[0];
@@ -93,7 +121,7 @@ export class TodoService {
     }
   }
 
-  async deleteTodoByIdDb(id: string): Promise<ToDoModel> {
+  async deleteTodoByIdDb(id: string): Promise<ToDo> {
     const todoDb = await this.todoRepository.findOneBy({ id: id });
     if (!todoDb) throw new NotFoundException('Todo Not found with id ' + id);
     return await this.todoRepository.remove(todoDb);
@@ -102,7 +130,7 @@ export class TodoService {
     await this.todoRepository.restore(id);
   }
 
-  updateTodoById(id: string, todoData: UpdateTodoDto): ToDoModel {
+  updateTodoById(id: string, todoData: UpdateTodoDto): ToDo {
     const index = this.todos.findIndex((todo) => todo.id == id);
     if (index !== -1) {
       const updatedTodo = { ...this.todos[index], ...todoData };
@@ -115,7 +143,7 @@ export class TodoService {
   async updateTodoByIdDb(
     id: string,
     todoData: UpdateTodoDto,
-  ): Promise<ToDoModel> {
+  ): Promise<ToDo> {
     const todoDb = await this.todoRepository.findOneBy({ id: id });
     if (!todoDb) throw new NotFoundException('Todo Not found with id ' + id);
     todoDb.name = todoData.name ?? todoDb.name;

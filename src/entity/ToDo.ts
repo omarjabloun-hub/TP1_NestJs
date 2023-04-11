@@ -10,7 +10,7 @@ import {
 import { BaseEntity } from '../common/BaseEntity';
 
 @Entity()
-export class ToDoModel extends BaseEntity {
+export class ToDo extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string;
   @Column()
