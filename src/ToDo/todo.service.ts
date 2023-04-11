@@ -4,8 +4,7 @@ import { TodoStatus } from '../entity/ToDoStatus';
 import { CreateToDoDto } from '../Dto/CreateToDoDto';
 import { UpdateTodoDto } from '../Dto/UpdateTodoDto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
-import {AppDataSource} from "../data-source";
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TodoService {
@@ -77,11 +76,18 @@ export class TodoService {
     return newTodo;
   }
 
-  async getAllTodosDb(status: TodoStatus, key: string, page: number, size: number): Promise<{ todos: ToDo[]; total: number }> {
+  async getAllTodosDb(
+    status: TodoStatus,
+    key: string,
+    page: number,
+    size: number,
+  ): Promise<{ todos: ToDo[]; total: number }> {
     const qb = this.todoRepository.createQueryBuilder('todo');
 
     if (key) {
-      qb.andWhere('(todo.description LIKE :query OR todo.name LIKE :query)', { query: `%${key}%` });
+      qb.andWhere('(todo.description LIKE :query OR todo.name LIKE :query)', {
+        query: `%${key}%`,
+      });
     }
 
     if (status) {
@@ -89,9 +95,9 @@ export class TodoService {
     }
 
     const [todos, total] = await qb
-        .skip((page - 1) * size)
-        .take(size)
-        .getManyAndCount();
+      .skip((page - 1) * size)
+      .take(size)
+      .getManyAndCount();
 
     return { todos, total };
   }
@@ -140,10 +146,7 @@ export class TodoService {
       throw new NotFoundException('Todo Not found with id ' + id);
     }
   }
-  async updateTodoByIdDb(
-    id: string,
-    todoData: UpdateTodoDto,
-  ): Promise<ToDo> {
+  async updateTodoByIdDb(id: string, todoData: UpdateTodoDto): Promise<ToDo> {
     const todoDb = await this.todoRepository.findOneBy({ id: id });
     if (!todoDb) throw new NotFoundException('Todo Not found with id ' + id);
     todoDb.name = todoData.name ?? todoDb.name;
