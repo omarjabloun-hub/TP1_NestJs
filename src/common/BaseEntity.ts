@@ -1,13 +1,13 @@
 import { CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
 export class BaseEntity {
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({type : 'timestamp',update: false})
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn( {type : 'timestamp'})
   updatedAt: Date;
 
-  @DeleteDateColumn({ type: 'timestamp' })
+  @DeleteDateColumn( {type : 'timestamp'})
   deletedAt: Date;
   constructor(createdAt: Date, updatedAt: Date, deletedAt: Date) {
     this.deletedAt = deletedAt;

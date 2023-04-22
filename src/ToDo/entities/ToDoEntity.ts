@@ -1,4 +1,4 @@
-import { TodoStatus } from './ToDoStatus';
+import { TodoStatus } from '../../entity/ToDoStatus';
 import {
   Column,
   CreateDateColumn,
@@ -7,24 +7,30 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { BaseEntity } from '../common/BaseEntity';
+import { BaseEntity } from '../../common/BaseEntity';
 
-@Entity()
-export class ToDo extends BaseEntity {
-  @PrimaryGeneratedColumn()
+@Entity('todo')
+export class ToDoEntity extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column()
+  @Column({
+    type: 'varchar',
+  })
   name: string;
-  @Column()
+  @Column(
+    {
+        type: 'varchar',
+    }
+  )
   description: string;
-  @Column()
+  @Column(
+    {
+        type: 'enum',
+        enum: TodoStatus,
+        default: TodoStatus.Pending,
+    }
+  )
   status: TodoStatus;
-  @CreateDateColumn()
-  readonly createdAt: Date;
-  @UpdateDateColumn()
-  deletedAt: Date;
-  @DeleteDateColumn()
-  updatedAt: Date;
 
   constructor(
     id: string,
