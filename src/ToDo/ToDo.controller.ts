@@ -5,7 +5,9 @@ import {
   Get,
   Param,
   Patch,
-  Post, Query, Version,
+  Post,
+  Query,
+  Version,
 } from '@nestjs/common';
 import { ToDoEntity } from './entities/ToDoEntity';
 import { TodoStatus } from '../entity/ToDoStatus';
@@ -20,14 +22,14 @@ export class ToDoController {
 
   @Get()
   @Version('2')
-    async getAllTodosV2(@Query('status') status:TodoStatus,
-                        @Query('key') key: string,
-                        @Query('page') page: number = 1,
-                        @Query('size') size: number = 10
-  ): Promise< ToDoEntity[] > {
-      return await this.todoService.getTodos();
+  async getAllTodosV2(
+    @Query('status') status: TodoStatus,
+    @Query('key') key: string,
+    @Query('page') page = 1,
+    @Query('size') size = 10,
+  ): Promise<ToDoEntity[]> {
+    return await this.todoService.getTodos();
   }
-
 
   @Post()
   @Version('2')
@@ -66,7 +68,4 @@ export class ToDoController {
   // ): Promise<ToDoEntity> {
   //   return await this.todoService.updateTodoByIdDb(id, todoData);
   // }
-
-
-
 }

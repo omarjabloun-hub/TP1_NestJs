@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ToDoController } from './ToDo.controller';
 import { TodoService } from './todo.service';
-import { CommonModule } from '../common/common.module';
 import { ToDoEntity } from './entities/ToDoEntity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
