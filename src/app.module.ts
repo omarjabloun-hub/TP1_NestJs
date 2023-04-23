@@ -41,6 +41,6 @@ import { AuthenticationMiddleware } from './authentication-middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
-    consumer.apply(AuthenticationMiddleware).forRoutes('v1/todo');
+    consumer.apply(AuthenticationMiddleware).forRoutes('todo');
   }
 }

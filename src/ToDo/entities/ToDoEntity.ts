@@ -17,19 +17,15 @@ export class ToDoEntity extends BaseEntity {
     type: 'varchar',
   })
   name: string;
-  @Column(
-    {
-        type: 'varchar',
-    }
-  )
+  @Column({
+    type: 'varchar',
+  })
   description: string;
-  @Column(
-    {
-        type: 'enum',
-        enum: TodoStatus,
-        default: TodoStatus.Pending,
-    }
-  )
+  @Column({
+    type: 'enum',
+    enum: TodoStatus,
+    default: TodoStatus.Pending,
+  })
   status: TodoStatus;
 
   constructor(
@@ -47,5 +43,4 @@ export class ToDoEntity extends BaseEntity {
     this.description = description;
     this.status = status;
   }
-
 }
