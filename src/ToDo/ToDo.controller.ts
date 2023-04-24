@@ -28,7 +28,7 @@ export class ToDoController {
     @Query('page') page = 1,
     @Query('size') size = 10,
   ): Promise<ToDoEntity[]> {
-    return await this.todoService.getTodos();
+    return await this.todoService.getAllTodosDb(page, size, status, key);
   }
 
   @Post()
@@ -36,23 +36,39 @@ export class ToDoController {
   async createTodo(@Body() todoData: CreateToDoDto): Promise<ToDoEntity> {
     return await this.todoService.create(todoData);
   }
-
-  // @Get('/statusNumber')
-  // async getTodoNumberByStatus() {
-  //   return await this.todoService.;
-  // }
+  @Post('restore/:id')
+  @Version('2')
+  async restoreTodo(@Param('id') id: string) {
+    return await this.todoService.restoreTodoById(id);
+  }
+  @Get('/statusNumber')
+  async getTodoNumberByStatus() {
+    return await this.todoService.getTodoNumberByStatus();
+  }
+  @Get(':id')
+  @Version('2')
+  async getTodoByIdDb(@Param('id') id: string): Promise<ToDoEntity> {
+    return this.todoService.find(id);
+  }
+  @Post(':id')
+  @Version('2')
+  async updateTodoByIdDb(
+    @Param('id') id: string,
+    @Body() todoData: UpdateTodoDto,
+  ): Promise<ToDoEntity> {
+    return await this.todoService.updateTodoByIdDb(id, todoData);
+  }
+  @Delete(':id')
+  @Version('2')
+  deleteTodoById(@Param('id') id: string) {
+    return this.todoService.deleteTodoByIdDb(id);
+  }
 
   // @Get(':id')
   // @Version('1')
   // getTodoById(@Param('id') id: string): ToDoEntity {
   //   return this.todoService.getTodoById(id);
   // }
-
-  @Get(':id')
-  @Version('2')
-  async getTodoByIdDb(@Param('id') id: string): Promise<ToDoEntity> {
-    return this.todoService.find(id);
-  }
 
   // @Delete(':id')
   // @Version('1')
